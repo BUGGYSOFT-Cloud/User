@@ -1,4 +1,8 @@
 package com.buggysoft.user.constants;
 
-public class Gender {
+public enum Gender {
+  MALE,
+  FEMALE,
+  NON_BINARY
+  ;
 }
