@@ -1,4 +1,7 @@
 package com.buggysoft.user.mapper;
 
-public interface UserMapper{
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.buggysoft.user.entity.User;
+
+public interface UserMapper extends BaseMapper<User> {
 }
