@@ -32,13 +32,14 @@ public class UserService {
       newUser.setLastname(loginRequest.getLastname());
       newUser.setGender(loginRequest.getGender());
       userMapper.insert(newUser);
-      return new ResponseEntity<>(users.get(0), HttpStatus.OK);
+      return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
     ;
     return new ResponseEntity<>("User Already Exists!", HttpStatus.BAD_REQUEST);
   }
 
   public ResponseEntity<?> login(LoginRequest loginRequest) {
+    System.out.println("login is called with email " + loginRequest.getEmail());
     Map<String, Object> loginMap = new HashMap<>();
     loginMap.put("email", loginRequest.getEmail());
     loginMap.put("password", loginRequest.getPassword());
