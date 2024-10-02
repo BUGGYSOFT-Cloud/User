@@ -1,0 +1,13 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+
+
+spring:
+  application:
+    name: user
+  datasource:
+    url: jdbc:mysql://35.184.107.37:3306/users
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
