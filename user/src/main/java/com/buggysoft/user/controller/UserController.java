@@ -21,9 +21,14 @@ public class UserController {
     return userService.register(loginRequest);
   }
 
-  @GetMapping("/login")
+  @PostMapping("/login")
   public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
     return userService.login(loginRequest);
+  }
+
+  @PostMapping
+  public ResponseEntity<?> saveUser(@RequestBody LoginRequest loginRequest) {
+    return userService.saveUser(loginRequest);
   }
 
   @PatchMapping("/delete")

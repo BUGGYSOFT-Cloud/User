@@ -22,20 +22,23 @@ public class UserService {
     Map<String, Object> emailMap = new HashMap<>();
     emailMap.put("email", loginRequest.getEmail());
     List<User> users = userMapper.selectByMap(emailMap);
-
-    if (users.isEmpty()) {
-      // Insert user if the user doesn't exist.
-      User newUser = new User();
-      newUser.setEmail(loginRequest.getEmail());
-      newUser.setPassword(loginRequest.getPassword());
-      newUser.setFirstname(loginRequest.getFirstname());
-      newUser.setLastname(loginRequest.getLastname());
-      newUser.setGender(loginRequest.getGender());
-      userMapper.insert(newUser);
-      return new ResponseEntity<>(newUser, HttpStatus.OK);
+    if (!users.isEmpty()) {
+      return new ResponseEntity<>("User Already Exists!", HttpStatus.BAD_REQUEST);
     }
-    ;
-    return new ResponseEntity<>("User Already Exists!", HttpStatus.BAD_REQUEST);
+
+    return new ResponseEntity<>("OK, please complete the verification!", HttpStatus.OK);
+
+  }
+
+  public ResponseEntity<?> saveUser(LoginRequest loginRequest) {
+    User newUser = new User();
+    newUser.setEmail(loginRequest.getEmail());
+    newUser.setPassword(loginRequest.getPassword());
+    newUser.setFirstname(loginRequest.getFirstname());
+    newUser.setLastname(loginRequest.getLastname());
+    newUser.setGender(loginRequest.getGender());
+    userMapper.insert(newUser);
+    return new ResponseEntity<>(newUser, HttpStatus.OK);
   }
 
   public ResponseEntity<?> login(LoginRequest loginRequest) {
