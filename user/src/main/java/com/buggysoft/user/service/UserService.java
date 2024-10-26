@@ -1,5 +1,6 @@
 package com.buggysoft.user.service;
 
+import com.buggysoft.user.constants.UserType;
 import com.buggysoft.user.entity.User;
 import com.buggysoft.user.mapper.UserMapper;
 import com.buggysoft.user.loginrequest.LoginRequest;
@@ -41,6 +42,7 @@ public class UserService {
     newUser.setFirstname(loginRequest.getFirstname());
     newUser.setLastname(loginRequest.getLastname());
     newUser.setGender(loginRequest.getGender());
+    newUser.setUsertype(UserType.USER);
     userMapper.insert(newUser);
 
     URI locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -65,15 +67,23 @@ public class UserService {
     return new ResponseEntity<>(users.get(0), HttpStatus.OK);
   }
 
-//  public ResponseEntity<?> getUser(String email) {
-//    Map<String, Object> emailMap = new HashMap<>();
-//    emailMap.put("email", email);
-//    List<User> users = userMapper.selectByMap(emailMap);
-//    if (users.isEmpty()) {
-//      return new ResponseEntity<>("User Does Not Exist", HttpStatus.BAD_REQUEST);
-//    };
-//    return new ResponseEntity<>(users.get(0), HttpStatus.OK);
-//  }
+  public ResponseEntity<?> listUsers(int page, int size, UserType requestingUserType) {
+    if (requestingUserType != UserType.ADMIN) {
+      return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
+    }
+    long totalRecords = userMapper.selectCount(null);
+    long pageSize = (totalRecords > size) ? size : Math.min(size, totalRecords);
+    int maxPage = (int) Math.ceil((double) totalRecords / pageSize);
+    if (page > maxPage) {
+      return new ResponseEntity<>("No Users Found", HttpStatus.NO_CONTENT);
+    }
+    List<User> users = userMapper.findAllWithPagination(pageSize, (page - 1) * pageSize);
+    if (users.isEmpty()) {
+      return new ResponseEntity<>("No Users Found", HttpStatus.NO_CONTENT);
+    }
+
+    return new ResponseEntity<>(users, HttpStatus.OK);
+  }
 
   public ResponseEntity<?> delete(LoginRequest loginRequest) {
     Map<String, Object> emailMap = new HashMap<>();
