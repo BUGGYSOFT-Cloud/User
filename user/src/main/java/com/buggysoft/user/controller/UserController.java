@@ -37,9 +37,9 @@ public class UserController {
     return userService.delete(loginRequest);
   }
 
-  @GetMapping("getAllUsers")
-  public ResponseEntity<?> getAllUsers(@RequestBody User user, @RequestParam int page, int size) {
-    return userService.listUsers(page, size, user.getUsertype());
+  @GetMapping("/getAllUsers")
+  public ResponseEntity<?> getAllUsers(@RequestParam int page, @RequestParam int size) {
+    return userService.listUsers(page, size);
   }
 
   @GetMapping({"/", "/index", "/home"})

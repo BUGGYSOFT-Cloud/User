@@ -67,10 +67,10 @@ public class UserService {
     return new ResponseEntity<>(users.get(0), HttpStatus.OK);
   }
 
-  public ResponseEntity<?> listUsers(int page, int size, UserType requestingUserType) {
-    if (requestingUserType != UserType.ADMIN) {
-      return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
-    }
+  public ResponseEntity<?> listUsers(int page, int size) {
+//    if (requestingUserType != UserType.ADMIN) {
+//      return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
+//    }
     long totalRecords = userMapper.selectCount(null);
     long pageSize = (totalRecords > size) ? size : Math.min(size, totalRecords);
     int maxPage = (int) Math.ceil((double) totalRecords / pageSize);
@@ -82,7 +82,22 @@ public class UserService {
       return new ResponseEntity<>("No Users Found", HttpStatus.NO_CONTENT);
     }
 
-    return new ResponseEntity<>(users, HttpStatus.OK);
+    Map<String, Object> response = new HashMap<>();
+    response.put("data", users);
+    String baseHref = "/getAllUsers?page=";
+    Map<String, Object> links = new HashMap<>();
+    links.put("current", Map.of("rel", "current", "href", baseHref + page + "&size=" + size));
+
+    if (page > 1) {
+      links.put("prev", Map.of("rel", "prev", "href", baseHref + (page - 1) + "&size=" + size));
+    }
+    if (page < maxPage) {
+      links.put("next", Map.of("rel", "next", "href", baseHref + (page + 1) + "&size=" + size));
+    }
+
+    response.put("links", links);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   public ResponseEntity<?> delete(LoginRequest loginRequest) {
