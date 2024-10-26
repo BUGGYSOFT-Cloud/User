@@ -76,4 +76,15 @@ public class UserService {
     userMapper.deleteByMap(emailMap);
     return new ResponseEntity<>("Success", HttpStatus.OK);
   }
+
+  public ResponseEntity<?> get_user_info(LoginRequest loginRequest) {
+    List<Object> userInfo = Arrays.asList(
+        loginRequest.getEmail(),
+        loginRequest.getPassword(),
+        loginRequest.getFirstname(),
+        loginRequest.getLastname(),
+        loginRequest.getGender()
+    );
+    return userInfo;
+  }
 }
