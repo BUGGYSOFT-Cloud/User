@@ -7,10 +7,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 
 @Service
 public class UserService {
@@ -85,6 +89,12 @@ public class UserService {
         loginRequest.getLastname(),
         loginRequest.getGender()
     );
-    return userInfo;
+
+    URI locationUri = ServletUriComponentsBuilder.fromCurrentRequest().path(/{email}).buildAndExpand(loginRequest.getEmail()).toUri();
+    
+    HttpHeaders headers = new HttpHeaders();
+    headers.setLocation(locationUri);
+    
+    return new ResponseEntity<>(userInfo, headers, HttpStatus.CREATED);
   }
 }
