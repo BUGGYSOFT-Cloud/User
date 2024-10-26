@@ -36,6 +36,11 @@ public class UserController {
     return userService.delete(loginRequest);
   }
 
+  @PatchMapping("/get_user_info")
+  public ResponseEntity<?> getUserInfo(@RequestBody LoginRequest loginRequest) {
+    return userService.get_user_info(loginRequest);
+  }
+
   @GetMapping({"/", "/index", "/home"})
   public String index() {
     return "Welcome to user services!";
