@@ -11,7 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI
+import java.net.URI;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
@@ -42,7 +42,14 @@ public class UserService {
     newUser.setLastname(loginRequest.getLastname());
     newUser.setGender(loginRequest.getGender());
     userMapper.insert(newUser);
-    return new ResponseEntity<>(newUser, HttpStatus.OK);
+
+    URI locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("/getUser").queryParam("email", loginRequest.getEmail()).buildAndExpand(loginRequest.getEmail()).toUri();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setLocation(locationUri);
+
+    return new ResponseEntity<>(newUser, headers, HttpStatus.CREATED);
   }
 
   public ResponseEntity<?> login(LoginRequest loginRequest) {
@@ -81,20 +88,13 @@ public class UserService {
     return new ResponseEntity<>("Success", HttpStatus.OK);
   }
 
-  public ResponseEntity<?> get_user_info(LoginRequest loginRequest) {
-    List<Object> userInfo = Arrays.asList(
-        loginRequest.getEmail(),
-        loginRequest.getPassword(),
-        loginRequest.getFirstname(),
-        loginRequest.getLastname(),
-        loginRequest.getGender()
-    );
-
-    URI locationUri = ServletUriComponentsBuilder.fromCurrentRequest().path(/{email}).buildAndExpand(loginRequest.getEmail()).toUri();
-    
-    HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(locationUri);
-    
-    return new ResponseEntity<>(userInfo, headers, HttpStatus.CREATED);
+  public ResponseEntity<?> getUser(String email) {
+    Map<String, Object> emailMap = new HashMap<>();
+    emailMap.put("email", email);
+    List<User> users = userMapper.selectByMap(emailMap);
+    if (users.isEmpty()) {
+      return new ResponseEntity<>("User Does Not Exist", HttpStatus.BAD_REQUEST);
+    };
+    return new ResponseEntity<>(users.get(0), HttpStatus.OK);
   }
 }

@@ -26,7 +26,7 @@ public class UserController {
     return userService.login(loginRequest);
   }
 
-  @PostMapping
+  @PostMapping("/saveUser")
   public ResponseEntity<?> saveUser(@RequestBody LoginRequest loginRequest) {
     return userService.saveUser(loginRequest);
   }
@@ -36,13 +36,13 @@ public class UserController {
     return userService.delete(loginRequest);
   }
 
-  @PatchMapping("/get_user_info")
-  public ResponseEntity<?> getUserInfo(@RequestBody LoginRequest loginRequest) {
-    return userService.get_user_info(loginRequest);
-  }
-
   @GetMapping({"/", "/index", "/home"})
   public String index() {
     return "Welcome to user services!";
+  }
+
+  @GetMapping("/getUser")
+  public ResponseEntity<?> getUserInfo(@RequestParam String email) {
+    return userService.getUser(email);
   }
 }
