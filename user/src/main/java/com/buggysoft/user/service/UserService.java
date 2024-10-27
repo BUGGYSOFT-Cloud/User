@@ -5,6 +5,8 @@ import com.buggysoft.user.entity.User;
 import com.buggysoft.user.mapper.UserMapper;
 import com.buggysoft.user.loginrequest.LoginRequest;
 import java.util.List;
+
+import com.buggysoft.user.response.AsyncResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -15,13 +17,19 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
 
 @Service
 public class UserService {
 
   @Autowired
   UserMapper userMapper;
+
+  private final Map<String, AsyncResponse> asyncResponses = new ConcurrentHashMap<>();
+
 
   public ResponseEntity<?> register(LoginRequest loginRequest) {
     Map<String, Object> emailMap = new HashMap<>();
@@ -67,19 +75,41 @@ public class UserService {
     return new ResponseEntity<>(users.get(0), HttpStatus.OK);
   }
 
-  public ResponseEntity<?> listUsers(int page, int size) {
+  public ResponseEntity<?> getAllUsers(int page, int size) {
 //    if (requestingUserType != UserType.ADMIN) {
 //      return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
 //    }
+    String requestId = UUID.randomUUID().toString();
+
+    asyncResponses.put(requestId, new AsyncResponse("Processing", null));
+
+    CompletableFuture.runAsync(() -> {
+      listUsers(requestId, page, size);
+    });
+
+    String callbackUrl = "/listUsersStatus/" + requestId;
+    return ResponseEntity
+        .accepted()
+        .header("Location", callbackUrl)
+        .body(Map.of("requestId", requestId, "callbackUrl", callbackUrl));
+  }
+
+  public void listUsers(String requestId, int page, int size) {
+    // simulate a long-running task
+    // try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
     long totalRecords = userMapper.selectCount(null);
     long pageSize = (totalRecords > size) ? size : Math.min(size, totalRecords);
     int maxPage = (int) Math.ceil((double) totalRecords / pageSize);
     if (page > maxPage) {
-      return new ResponseEntity<>("No Users Found", HttpStatus.NO_CONTENT);
+      asyncResponses.put(requestId, new AsyncResponse("Completed",
+          Map.of("message", "No Users Found", "status", HttpStatus.NO_CONTENT.value())));
+      return;
     }
     List<User> users = userMapper.findAllWithPagination(pageSize, (page - 1) * pageSize);
     if (users.isEmpty()) {
-      return new ResponseEntity<>("No Users Found", HttpStatus.NO_CONTENT);
+      asyncResponses.put(requestId, new AsyncResponse("Completed",
+          Map.of("message", "No Users Found", "status", HttpStatus.NO_CONTENT.value())));
+      return;
     }
 
     Map<String, Object> response = new HashMap<>();
@@ -96,8 +126,21 @@ public class UserService {
     }
 
     response.put("links", links);
+    asyncResponses.put(requestId, new AsyncResponse("Completed", response));
 
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  public ResponseEntity<? extends Object> getUserStatus(String requestId) {
+    AsyncResponse asyncResponse = asyncResponses.get(requestId);
+    if (asyncResponse == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request ID not found.");
+    }
+
+    if ("Completed".equals(asyncResponse.getStatus())) {
+      return ResponseEntity.ok(asyncResponse.getData());
+    }
+
+    return ResponseEntity.status(HttpStatus.PROCESSING).body("Request is still processing.");
   }
 
   public ResponseEntity<?> delete(LoginRequest loginRequest) {
