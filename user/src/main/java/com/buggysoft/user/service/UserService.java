@@ -140,7 +140,7 @@ public class UserService {
       return ResponseEntity.ok(asyncResponse.getData());
     }
 
-    return ResponseEntity.status(HttpStatus.PROCESSING).body("Request is still processing.");
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body("Request is still processing.");
   }
 
   public ResponseEntity<?> delete(LoginRequest loginRequest) {
