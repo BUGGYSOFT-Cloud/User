@@ -39,7 +39,12 @@ public class UserController {
 
   @GetMapping("/getAllUsers")
   public ResponseEntity<?> getAllUsers(@RequestParam int page, @RequestParam int size) {
-    return userService.listUsers(page, size);
+    return userService.getAllUsers(page, size);
+  }
+
+  @GetMapping("/listUsersStatus/{requestId}")
+  public ResponseEntity<?> getStatus(@PathVariable String requestId) {
+    return userService.getUserStatus(requestId);
   }
 
   @GetMapping({"/", "/index", "/home"})
