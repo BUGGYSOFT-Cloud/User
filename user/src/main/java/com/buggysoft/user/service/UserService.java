@@ -63,7 +63,6 @@ public class UserService {
   }
 
   public ResponseEntity<?> login(LoginRequest loginRequest) {
-    System.out.println("login is called with email " + loginRequest.getEmail());
     Map<String, Object> loginMap = new HashMap<>();
     loginMap.put("email", loginRequest.getEmail());
     loginMap.put("password", loginRequest.getPassword());
@@ -75,7 +74,25 @@ public class UserService {
     return new ResponseEntity<>(users.get(0), HttpStatus.OK);
   }
 
-  public ResponseEntity<?> getAllUsers(int page, int size) {
+  public ResponseEntity<?> getAllUsersSync(int page, int size) {
+    String requestId = UUID.randomUUID().toString();
+    listUsers(requestId, page, size);
+
+    AsyncResponse response = asyncResponses.get(requestId);
+    if (response == null) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to complete the request.");
+    }
+    if ("Completed".equals(response.getStatus())) {
+      return ResponseEntity.status(HttpStatus.ACCEPTED)
+          .body(Map.of("status", "Completed", "data", response.getData()));
+    } else {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to complete the request.");
+    }
+  }
+
+  public ResponseEntity<?> getAllUsersAsync(int page, int size) {
 //    if (requestingUserType != UserType.ADMIN) {
 //      return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
 //    }
