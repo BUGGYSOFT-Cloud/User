@@ -6,6 +6,7 @@ import com.buggysoft.user.service.UserService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping
@@ -156,12 +161,32 @@ public class UserController {
       responseCode = "200",
       description = "Welcome message displayed",
       content = @Content(
-          mediaType = "text/plain",
-          examples = @ExampleObject(value = "Welcome to the User API!")
+          mediaType = "application/json",
+          examples = @ExampleObject(value = "{\"message\": \"Welcome to user services!\"}")
       )
   )
-  public ResponseEntity<String> index() {
-    return ResponseEntity.ok("Welcome to user services!");
+  public ResponseEntity<EntityModel<Map<String, String>>> index() {
+    Map<String, String> welcomeMessage = Map.of(
+        "message", "Welcome to user services!",
+        "registerDetails", "POST to /register with JSON body: { 'email': 'your_email', 'password': 'your_password', 'firstname': 'your_firstname', 'lastname': 'your_lastname', 'gender': your_gender}",
+        "loginDetails", "POST to /login with JSON body: { 'email': 'your_email', 'password': 'your_password' }"
+    );
+
+    Link registerLink = Link.of(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+            .registerUser(null)).toUri().toString())
+        .withRel("register")
+        .withTitle("Register a New User (JSON body: email, password, firstname, lastname, gender)")
+        .withType("POST");
+
+    Link loginLink = Link.of(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+            .loginUser(null)).toUri().toString())
+        .withRel("login")
+        .withTitle("Login (JSON body: email, password)")
+        .withType("POST");
+
+    EntityModel<Map<String, String>> responseModel = EntityModel.of(welcomeMessage, registerLink, loginLink);
+
+    return new ResponseEntity<>(responseModel, HttpStatus.OK);
   }
 
   @GetMapping("/getUser")
