@@ -4,6 +4,7 @@ import com.buggysoft.user.entity.User;
 import com.buggysoft.user.loginrequest.LoginRequest;
 import com.buggysoft.user.service.UserService;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,16 @@ public class UserController {
   }
 
   @PostMapping("/register")
-  @Operation(summary = "Register User", description = "Registers an user in the system.")
+  @Operation(summary = "Register User", description = "Registers a user in the system.")
   @ApiResponse(
       responseCode = "200",
       description = "User registration initiated successfully",
-      content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+      content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "User registered successfully. Please complete the verification process."))
   )
   @ApiResponse(
       responseCode = "400",
       description = "User already exists",
-      content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+      content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Registration failed: User already exists."))
   )
   public ResponseEntity<?> registerUser(@RequestBody LoginRequest loginRequest) {
     return userService.register(loginRequest);
@@ -50,7 +51,7 @@ public class UserController {
   @ApiResponse(
       responseCode = "400",
       description = "Invalid user and/or password",
-      content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+      content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Login failed: Invalid username or password."))
   )
   public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
     return userService.login(loginRequest);
@@ -72,12 +73,12 @@ public class UserController {
   @ApiResponse(
       responseCode = "200",
       description = "User deleted successfully",
-      content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+      content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "User deleted successfully."))
   )
   @ApiResponse(
       responseCode = "400",
       description = "User not found",
-      content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+      content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Deletion failed: User not found."))
   )
   public ResponseEntity<?> deleteUser(@RequestBody LoginRequest loginRequest) {
     return userService.delete(loginRequest);
@@ -90,10 +91,7 @@ public class UserController {
       description = "Request accepted for asynchronous processing",
       content = @Content(
           mediaType = "application/json",
-          schema = @Schema(
-              type = "object",
-              example = "{ \"requestId\": \"123e4567-e89b-12d3-a456-426614174000\", \"callbackUrl\": \"/listUsersStatus/123e4567-e89b-12d3-a456-426614174000\" }"
-          )
+          examples = @ExampleObject(value = "{ \"requestId\": \"123e4567-e89b-12d3-a456-426614174000\", \"callbackUrl\": \"/listUsersStatus/123e4567-e89b-12d3-a456-426614174000\" }")
       )
   )
   public ResponseEntity<?> getAllUsers(@RequestParam int page, @RequestParam int size) {
@@ -107,10 +105,7 @@ public class UserController {
       description = "Users retrieved successfully",
       content = @Content(
           mediaType = "application/json",
-          schema = @Schema(
-              type = "object",
-              example = "{ \"status\": \"Completed\", \"data\": [{\"id\": 1, \"email\": \"user@example.com\", \"name\": \"John Doe\"}] }"
-          )
+          examples = @ExampleObject(value = "{ \"status\": \"Completed\", \"data\": [{\"id\": 1, \"email\": \"user@example.com\", \"name\": \"John Doe\"}] }")
       )
   )
   @ApiResponse(
@@ -118,7 +113,7 @@ public class UserController {
       description = "Failed to complete the request",
       content = @Content(
           mediaType = "text/plain",
-          schema = @Schema(implementation = String.class)
+          examples = @ExampleObject(value = "Request failed: Unable to retrieve users.")
       )
   )
   public ResponseEntity<?> getAllUsersSync(@RequestParam int page, @RequestParam int size) {
@@ -132,10 +127,7 @@ public class UserController {
       description = "Request completed successfully with user data",
       content = @Content(
           mediaType = "application/json",
-          schema = @Schema(
-              type = "object",
-              example = "{ \"status\": \"Completed\", \"data\": [{\"id\": 1, \"email\": \"user@example.com\", \"name\": \"John Doe\"}], \"links\": { \"current\": { \"rel\": \"current\", \"href\": \"/getAllUsers?page=1&size=10\" }, \"prev\": { \"rel\": \"prev\", \"href\": \"/getAllUsers?page=0&size=10\" }, \"next\": { \"rel\": \"next\", \"href\": \"/getAllUsers?page=2&size=10\" } } }"
-          )
+          examples = @ExampleObject(value = "{ \"status\": \"Completed\", \"data\": [{\"id\": 1, \"email\": \"user@example.com\", \"name\": \"John Doe\"}], \"links\": { \"current\": { \"rel\": \"current\", \"href\": \"/getAllUsers?page=1&size=10\" }, \"prev\": { \"rel\": \"prev\", \"href\": \"/getAllUsers?page=0&size=10\" }, \"next\": { \"rel\": \"next\", \"href\": \"/getAllUsers?page=2&size=10\" } } }")
       )
   )
   @ApiResponse(
@@ -143,7 +135,7 @@ public class UserController {
       description = "Request is still processing",
       content = @Content(
           mediaType = "text/plain",
-          schema = @Schema(implementation = String.class)
+          examples = @ExampleObject(value = "Request is still processing.")
       )
   )
   @ApiResponse(
@@ -151,9 +143,10 @@ public class UserController {
       description = "Request ID not found",
       content = @Content(
           mediaType = "text/plain",
-          schema = @Schema(implementation = String.class)
+          examples = @ExampleObject(value = "Error: Request ID not found.")
       )
-  )public ResponseEntity<?> getStatus(@PathVariable String requestId) {
+  )
+  public ResponseEntity<?> getStatus(@PathVariable String requestId) {
     return userService.getUserStatus(requestId);
   }
 
@@ -164,7 +157,7 @@ public class UserController {
       description = "Welcome message displayed",
       content = @Content(
           mediaType = "text/plain",
-          schema = @Schema(implementation = String.class, example = "Welcome to user services!")
+          examples = @ExampleObject(value = "Welcome to the User API!")
       )
   )
   public ResponseEntity<String> index() {
@@ -186,10 +179,11 @@ public class UserController {
       description = "User does not exist",
       content = @Content(
           mediaType = "text/plain",
-          schema = @Schema(implementation = String.class, example = "User Does Not Exist")
+          examples = @ExampleObject(value = "User lookup failed: User does not exist.")
       )
   )
   public ResponseEntity<?> getUserInfo(@RequestParam String email) {
     return userService.getUser(email);
   }
+
 }
