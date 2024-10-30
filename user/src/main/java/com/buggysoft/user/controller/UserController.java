@@ -39,7 +39,12 @@ public class UserController {
 
   @GetMapping("/getAllUsers")
   public ResponseEntity<?> getAllUsers(@RequestParam int page, @RequestParam int size) {
-    return userService.getAllUsers(page, size);
+    return userService.getAllUsersAsync(page, size);
+  }
+
+  @GetMapping("/getAllUserSync")
+  public ResponseEntity<?> getAllUsersSync(@RequestParam int page, @RequestParam int size) {
+    return userService.getAllUsersSync(page, size);
   }
 
   @GetMapping("/listUsersStatus/{requestId}")
