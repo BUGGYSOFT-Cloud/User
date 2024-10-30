@@ -15,38 +15,85 @@ In order to build and use our service you must install the following:
 This section describes the endpoints that our service provides, as well as their inputs and outputs.
 
 #### GET /, /index, /home
-
 * Redirects to the homepage.
+*
 
 ---
 
 #### POST /register
-
-* Registers an user in the system. If successful, user information will be stored in the database.
+* Registers a user in the system. If successful, user information will be stored in the database.
 *
-* @param loginRequest -- A `LoginRequest` representing an entity with an email, password, first name, last name, and gender.
+* @param loginRequest -- A 'LoginRequest' representing an entity with an email, password, first name, last name, and gender.
 *
-* @return A `ResponseEntity` object containing either a success message or a failure and an error code.
+* @return A 'ResponseEntity' object containing either a success message or a failure and an error code.
 
 ---
 
 #### POST /login
-
-* Attempts to log in an user and checks if provided credentials are correct.
+* Attempts to log in a user and checks if provided credentials are correct.
 *
-* @param loginRequest -- A `LoginRequest` representing an entity with an email, password. Other parameters can be blank.
+* @param loginRequest -- A 'LoginRequest' representing an entity with an email, password. Other parameters can be blank.
 *
-* @return A `ResponseEntity` object containing either a success message or a failure and an error code.
+* @return A 'ResponseEntity' object containing either a success message or a failure and an error code.
 
 ---
 
-#### POST /delete
+#### POST /saveUser
+* Saves a new user in the system with the provided details.
+*
+* @param loginRequest -- A 'LoginRequest' representing an entity with an email, password, first name, last name, and gender.
+*
+* @return A 'ResponseEntity' object containing either the created 'User' object or an error code.
 
-* Unregisters/deletes an user's information from the database.
+---
+
+#### PATCH /delete
+* Deletes a user based on their email.
 *
-* @param loginRequest -- A `LoginRequest` representing an entity with an email, password. Other parameters can be blank.
+* @param loginRequest -- A 'LoginRequest' representing an entity with the email of the user to delete.
 *
-* @return A `ResponseEntity` object containing either a success message or a failure and an error code.
+* @return A 'ResponseEntity' object containing either a success message or an error code.
+
+---
+
+#### GET /getAllUsers
+* Retrieves all users asynchronously with pagination.
+*
+* @param page -- The page number for pagination.
+*
+* @param size -- The number of users per page.
+*
+* @return A 'ResponseEntity' object with a JSON object containing requestId and callbackUrl to check the status.
+
+---
+
+#### GET /getAllUserSync
+* Retrieves all users synchronously with pagination.
+*
+* @param page -- The page number for pagination.
+*
+* @param size -- The number of users per page.
+*
+* @return A 'ResponseEntity' object with a JSON object containing user data and pagination links.
+
+---
+
+#### GET /listUsersStatus/{requestId}
+* Retrieves the status of an asynchronous user retrieval request.
+*
+* @param requestId -- The unique identifier of the request to check its status.
+*
+* @return A 'ResponseEntity' object with either user data and pagination links, a status message if still processing, or an error message if the request ID is not found.
+
+---
+
+#### GET /getUser
+* Retrieves information about a specific user by email.
+*
+* @param email -- The email address of the user to retrieve.
+*
+* @return A 'ResponseEntity' object containing either the 'User' object or an error message.
+
 ## Local Variables
 
 Certain local variables need to be configured before the service can execute properly. 
