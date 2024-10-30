@@ -40,7 +40,6 @@ public class UserService {
     }
 
     return new ResponseEntity<>("OK, please complete the verification!", HttpStatus.OK);
-
   }
 
   public ResponseEntity<?> saveUser(LoginRequest loginRequest) {
@@ -168,7 +167,6 @@ public class UserService {
     if (users.isEmpty()) {
       return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
     }
-    ;
     userMapper.deleteByMap(emailMap);
     return new ResponseEntity<>("Success", HttpStatus.OK);
   }
