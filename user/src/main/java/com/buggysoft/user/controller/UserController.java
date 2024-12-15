@@ -1,5 +1,6 @@
 package com.buggysoft.user.controller;
 
+import com.buggysoft.user.constants.UserType;
 import com.buggysoft.user.entity.User;
 import com.buggysoft.user.loginrequest.LoginRequest;
 import com.buggysoft.user.service.UserService;
@@ -7,11 +8,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.hateoas.EntityModel;
@@ -70,6 +72,9 @@ public class UserController {
       content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
   )
   public ResponseEntity<?> saveUser(@RequestBody LoginRequest loginRequest) {
+    if (userService.isUserRegistered(loginRequest.getEmail())) {
+      return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
+    }
     return userService.saveUser(loginRequest);
   }
 
@@ -85,7 +90,11 @@ public class UserController {
       description = "User not found",
       content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Deletion failed: User not found."))
   )
-  public ResponseEntity<?> deleteUser(@RequestBody LoginRequest loginRequest) {
+  public ResponseEntity<?> deleteUser(HttpServletRequest request, @RequestBody LoginRequest loginRequest) {
+    String email = (String) request.getAttribute("email");
+    if (!email.equals(loginRequest.getEmail()) || userService.getUserByEmail(loginRequest.getEmail()).getUsertype() != UserType.ADMIN) {
+      return new ResponseEntity<>("Insufficient Permission.", HttpStatus.FORBIDDEN);
+    }
     return userService.delete(loginRequest);
   }
 
@@ -99,7 +108,11 @@ public class UserController {
           examples = @ExampleObject(value = "{ \"requestId\": \"123e4567-e89b-12d3-a456-426614174000\", \"callbackUrl\": \"/listUsersStatus/123e4567-e89b-12d3-a456-426614174000\" }")
       )
   )
-  public ResponseEntity<?> getAllUsers(@RequestParam int page, @RequestParam int size) {
+  public ResponseEntity<?> getAllUsers(HttpServletRequest request, @RequestParam int page, @RequestParam int size) {
+    String email = (String) request.getAttribute("email");
+    if (userService.getUserByEmail(email).getUsertype() != UserType.ADMIN) {
+      return new ResponseEntity<>("Insufficient Permission.", HttpStatus.FORBIDDEN);
+    }
     return userService.getAllUsersAsync(page, size);
   }
 
@@ -121,7 +134,11 @@ public class UserController {
           examples = @ExampleObject(value = "Request failed: Unable to retrieve users.")
       )
   )
-  public ResponseEntity<?> getAllUsersSync(@RequestParam int page, @RequestParam int size) {
+  public ResponseEntity<?> getAllUsersSync(HttpServletRequest request, @RequestParam int page, @RequestParam int size) {
+    String email = (String) request.getAttribute("email");
+    if (userService.getUserByEmail(email).getUsertype() != UserType.ADMIN) {
+      return new ResponseEntity<>("Insufficient Permission.", HttpStatus.FORBIDDEN);
+    }
     return userService.getAllUsersSync(page, size);
   }
 
