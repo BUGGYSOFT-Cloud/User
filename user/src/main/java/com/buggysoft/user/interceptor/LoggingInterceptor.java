@@ -25,7 +25,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
       logger.info("Header: " + header + " = " + request.getHeader(header));
     }
     String uri = request.getRequestURI();
-    if (uri.equals("/login") || uri.equals("/register")) {
+    if (uri.equals("/login") || uri.equals("/register") || uri.equals("/saveUser")) {
       logger.info("Skipping token validation for: " + uri);
       return true;
     }
@@ -38,14 +38,16 @@ public class LoggingInterceptor implements HandlerInterceptor {
     }
 
     String token = authHeader.substring(TOKEN_PREFIX.length());
-    if (!validateToken(token)) {
+    String email = validateToken(token);
+    if (email == null) {
       logger.warning("Invalid token for request to: " + uri);
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.getWriter().write("Invalid token");
       return false;
     }
 
-    logger.info("Valid token for request to: " + uri);
+    request.setAttribute("email", email);
+    logger.info("Valid token from " + email + " for request to: " + uri);
     return true;
   }
 
@@ -55,13 +57,14 @@ public class LoggingInterceptor implements HandlerInterceptor {
     logger.info("Completed processing request for " + request.getMethod() + " " + request.getRequestURI());
   }
 
-  private boolean validateToken(String token) {
+  private String validateToken(String token) {
     String SECRET_KEY = System.getenv("JWT_SECRET_KEY");;
     Algorithm ALGORITHM = Algorithm.HMAC256(SECRET_KEY);
     try {
       JWTVerifier verifier = JWT.require(ALGORITHM).build();
       DecodedJWT jwt = verifier.verify(token);
-      return true;
+      String email = jwt.getSubject();
+      return email;
     } catch (TokenExpiredException e) {
       logger.warning("Token has expired: " + e.getMessage());
     } catch (JWTVerificationException e) {
@@ -69,6 +72,6 @@ public class LoggingInterceptor implements HandlerInterceptor {
     } catch (Exception e) {
       logger.warning("Unexpected error during token validation: " + e.getMessage());
     }
-    return false;
+    return null;
   }
 }

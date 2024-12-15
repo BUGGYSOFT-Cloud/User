@@ -4,7 +4,8 @@ import com.buggysoft.user.constants.UserType;
 import com.buggysoft.user.entity.User;
 import com.buggysoft.user.mapper.UserMapper;
 import com.buggysoft.user.loginrequest.LoginRequest;
-import java.util.List;
+
+import java.util.*;
 
 import com.buggysoft.user.response.AsyncResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -29,16 +27,21 @@ public class UserService {
 
   private final Map<String, AsyncResponse> asyncResponses = new ConcurrentHashMap<>();
 
-
   public ResponseEntity<?> register(LoginRequest loginRequest) {
-    Map<String, Object> emailMap = new HashMap<>();
-    emailMap.put("email", loginRequest.getEmail());
-    List<User> users = userMapper.selectByMap(emailMap);
-    if (!users.isEmpty()) {
+    if (isUserRegistered(loginRequest.getEmail())) {
       return new ResponseEntity<>("User Already Exists!", HttpStatus.BAD_REQUEST);
     }
-
     return new ResponseEntity<>("OK, please complete the verification!", HttpStatus.OK);
+  }
+
+  public boolean isUserRegistered(String email) {
+    Map<String, Object> emailMap = new HashMap<>();
+    emailMap.put("email", email);
+    List<User> users = userMapper.selectByMap(emailMap);
+    if (!users.isEmpty()) {
+      return true;
+    }
+    return false;
   }
 
   public ResponseEntity<?> saveUser(LoginRequest loginRequest) {
@@ -48,7 +51,7 @@ public class UserService {
     newUser.setFirstname(loginRequest.getFirstname());
     newUser.setLastname(loginRequest.getLastname());
     newUser.setGender(loginRequest.getGender());
-    newUser.setUsertype(UserType.USER);
+    newUser.setUsertype(UserType.BUGGYSOFT);
     userMapper.insert(newUser);
 
     URI locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -68,8 +71,8 @@ public class UserService {
     if (users.isEmpty()) {
       return new ResponseEntity<>("User or Password Incorrect", HttpStatus.BAD_REQUEST);
     }
-    ;
-    return new ResponseEntity<>(users.get(0), HttpStatus.OK);
+
+    return new ResponseEntity<>(Map.of("user", users.get(0), "token", JwtService.generateToken(loginRequest.getEmail())), HttpStatus.OK);
   }
 
   public ResponseEntity<?> getAllUsersSync(int page, int size) {
@@ -171,12 +174,20 @@ public class UserService {
   }
 
   public ResponseEntity<?> getUser(String email) {
+    User user = getUserByEmail(email);
+    if (user == null) {
+      return new ResponseEntity<>("User Does Not Exist", HttpStatus.BAD_REQUEST);
+    };
+    return new ResponseEntity<>(user, HttpStatus.OK);
+  }
+
+  public User getUserByEmail(String email) {
     Map<String, Object> emailMap = new HashMap<>();
     emailMap.put("email", email);
     List<User> users = userMapper.selectByMap(emailMap);
     if (users.isEmpty()) {
-      return new ResponseEntity<>("User Does Not Exist", HttpStatus.BAD_REQUEST);
+      return null;
     };
-    return new ResponseEntity<>(users.get(0), HttpStatus.OK);
+    return users.get(0);
   }
 }
