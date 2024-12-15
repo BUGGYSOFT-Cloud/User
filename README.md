@@ -12,87 +12,90 @@ In order to build and use our service you must install the following:
 5. In order to run the project, either use the IntelliJ built in run function, or go to user/target and execute *java -jar user-0.0.1-SNAPSHOT.jar*.
 
 ## Endpoints
-This section describes the endpoints that our service provides, as well as their inputs and outputs.
 
-#### GET /, /index, /home
-* Redirects to the homepage.
-*
+This section describes the endpoints provided by our service, along with their inputs and outputs.
 
 ---
 
-#### POST /register
-* Registers a user in the system. If successful, user information will be stored in the database.
-*
-* @param loginRequest -- A 'LoginRequest' representing an entity with an email, password, first name, last name, and gender.
-*
-* @return A 'ResponseEntity' object containing either a success message or a failure and an error code.
+### GET `/`, `/index`, `/home`
+- **Description:** Redirects to the homepage.
+- **Returns:** A JSON object with a welcome message and links to register and login.
 
 ---
 
-#### POST /login
-* Attempts to log in a user and checks if provided credentials are correct.
-*
-* @param loginRequest -- A 'LoginRequest' representing an entity with an email, password. Other parameters can be blank.
-*
-* @return A 'ResponseEntity' object containing either a success message or a failure and an error code.
+### POST `/register`
+- **Description:** Registers a new user in the system.
+- **Request Body:** A `LoginRequest` object containing:
+  - `email` (String)
+  - `password` (String)
+  - `firstname` (String)
+  - `lastname` (String)
+  - `gender` (String)
+- **Returns:** A `ResponseEntity` containing a success or error message.
 
 ---
 
-#### POST /saveUser
-* Saves a new user in the system with the provided details.
-*
-* @param loginRequest -- A 'LoginRequest' representing an entity with an email, password, first name, last name, and gender.
-*
-* @return A 'ResponseEntity' object containing either the created 'User' object or an error code.
+### POST `/login`
+- **Description:** Logs in a user by verifying their credentials.
+- **Request Body:** A `LoginRequest` object containing:
+  - `email` (String)
+  - `password` (String)
+- **Returns:** A `ResponseEntity` containing user details and a token, or an error message.
 
 ---
 
-#### PATCH /delete
-* Deletes a user based on their email.
-*
-* @param loginRequest -- A 'LoginRequest' representing an entity with the email of the user to delete.
-*
-* @return A 'ResponseEntity' object containing either a success message or an error code.
+### POST `/saveUser`
+- **Description:** Saves a new user in the system.
+- **Request Body:** A `LoginRequest` object containing:
+  - `email` (String)
+  - `password` (String)
+  - `firstname` (String)
+  - `lastname` (String)
+  - `gender` (String)
+- **Returns:** A `ResponseEntity` containing the created user object or an error message.
 
 ---
 
-#### GET /getAllUsers
-* Retrieves all users asynchronously with pagination.
-*
-* @param page -- The page number for pagination.
-*
-* @param size -- The number of users per page.
-*
-* @return A 'ResponseEntity' object with a JSON object containing requestId and callbackUrl to check the status.
+### PATCH `/delete`
+- **Description:** Deletes a user based on their email.
+- **Request Body:** A `LoginRequest` object containing:
+  - `email` (String)
+- **Returns:** A `ResponseEntity` containing a success or error message.
 
 ---
 
-#### GET /getAllUserSync
-* Retrieves all users synchronously with pagination.
-*
-* @param page -- The page number for pagination.
-*
-* @param size -- The number of users per page.
-*
-* @return A 'ResponseEntity' object with a JSON object containing user data and pagination links.
+### GET `/getAllUsers`
+- **Description:** Retrieves all users asynchronously with pagination.
+- **Query Parameters:**
+  - `page` (Integer): The page number for pagination.
+  - `size` (Integer): The number of users per page.
+- **Returns:** A `ResponseEntity` containing a JSON object with the request ID and callback URL.
 
 ---
 
-#### GET /listUsersStatus/{requestId}
-* Retrieves the status of an asynchronous user retrieval request.
-*
-* @param requestId -- The unique identifier of the request to check its status.
-*
-* @return A 'ResponseEntity' object with either user data and pagination links, a status message if still processing, or an error message if the request ID is not found.
+### GET `/getAllUserSync`
+- **Description:** Retrieves all users synchronously with pagination.
+- **Query Parameters:**
+  - `page` (Integer): The page number for pagination.
+  - `size` (Integer): The number of users per page.
+- **Returns:** A `ResponseEntity` containing a JSON object with user data and pagination links.
 
 ---
 
-#### GET /getUser
-* Retrieves information about a specific user by email.
-*
-* @param email -- The email address of the user to retrieve.
-*
-* @return A 'ResponseEntity' object containing either the 'User' object or an error message.
+### GET `/listUsersStatus/{requestId}`
+- **Description:** Retrieves the status of an asynchronous user retrieval request.
+- **Path Parameters:**
+  - `requestId` (String): The unique identifier of the request.
+- **Returns:** A `ResponseEntity` containing user data and pagination links if completed, a processing status message if still processing, or an error message if the request ID is not found.
+
+---
+
+### GET `/getUser`
+- **Description:** Retrieves information about a specific user by email.
+- **Query Parameters:**
+  - `email` (String): The email address of the user to retrieve.
+- **Returns:** A `ResponseEntity` containing the user object or an error message.
+  
 
 ## Local Variables
 
