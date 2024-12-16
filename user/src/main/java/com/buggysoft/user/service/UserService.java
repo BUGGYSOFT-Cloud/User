@@ -44,14 +44,15 @@ public class UserService {
     return false;
   }
 
-  public ResponseEntity<?> saveUser(LoginRequest loginRequest) {
+  public ResponseEntity<?> saveUser(LoginRequest loginRequest, String userType) {
     User newUser = new User();
     newUser.setEmail(loginRequest.getEmail());
     newUser.setPassword(loginRequest.getPassword());
     newUser.setFirstname(loginRequest.getFirstname());
     newUser.setLastname(loginRequest.getLastname());
     newUser.setGender(loginRequest.getGender());
-    newUser.setUsertype(UserType.BUGGYSOFT);
+    Map<String, UserType> m = Map.of("BUGGYSOFT", UserType.BUGGYSOFT, "GOOGLE", UserType.GOOGLE);
+    newUser.setUserType(m.get(userType));
     userMapper.insert(newUser);
 
     URI locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
