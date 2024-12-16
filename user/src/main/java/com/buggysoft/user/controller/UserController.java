@@ -71,11 +71,11 @@ public class UserController {
       description = "User created successfully",
       content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
   )
-  public ResponseEntity<?> saveUser(@RequestBody LoginRequest loginRequest) {
+  public ResponseEntity<?> saveUser(@RequestBody LoginRequest loginRequest, @RequestParam String userType) {
     if (userService.isUserRegistered(loginRequest.getEmail())) {
       return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
     }
-    return userService.saveUser(loginRequest);
+    return userService.saveUser(loginRequest, userType);
   }
 
   @PatchMapping("/delete")
@@ -92,7 +92,7 @@ public class UserController {
   )
   public ResponseEntity<?> deleteUser(HttpServletRequest request, @RequestBody LoginRequest loginRequest) {
     String email = (String) request.getAttribute("email");
-    if (!email.equals(loginRequest.getEmail()) || userService.getUserByEmail(loginRequest.getEmail()).getUsertype() != UserType.ADMIN) {
+    if (!email.equals(loginRequest.getEmail()) || userService.getUserByEmail(loginRequest.getEmail()).getUserType() != UserType.ADMIN) {
       return new ResponseEntity<>("Insufficient Permission.", HttpStatus.FORBIDDEN);
     }
     return userService.delete(loginRequest);
@@ -110,7 +110,7 @@ public class UserController {
   )
   public ResponseEntity<?> getAllUsers(HttpServletRequest request, @RequestParam int page, @RequestParam int size) {
     String email = (String) request.getAttribute("email");
-    if (userService.getUserByEmail(email).getUsertype() != UserType.ADMIN) {
+    if (userService.getUserByEmail(email).getUserType() != UserType.ADMIN) {
       return new ResponseEntity<>("Insufficient Permission.", HttpStatus.FORBIDDEN);
     }
     return userService.getAllUsersAsync(page, size);
@@ -136,7 +136,7 @@ public class UserController {
   )
   public ResponseEntity<?> getAllUsersSync(HttpServletRequest request, @RequestParam int page, @RequestParam int size) {
     String email = (String) request.getAttribute("email");
-    if (userService.getUserByEmail(email).getUsertype() != UserType.ADMIN) {
+    if (userService.getUserByEmail(email).getUserType() != UserType.ADMIN) {
       return new ResponseEntity<>("Insufficient Permission.", HttpStatus.FORBIDDEN);
     }
     return userService.getAllUsersSync(page, size);
